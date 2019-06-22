@@ -25,8 +25,7 @@ db = scoped_session(sessionmaker(bind=engine))
 
 @app.route("/")
 def index():
-    return "<h1>Hello, Doco Book</h1>"
-    #return render_template("index.html")
+    return render_template("index.html")
 
 @app.route("/store",methods=['POST'])
 def store():
