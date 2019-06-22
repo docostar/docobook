@@ -1,1 +1,1 @@
-web:gunicorn docobook:application
+web: python3 application.py
