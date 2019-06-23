@@ -10,10 +10,10 @@
     <form action="{{ url_for('store') }}" method="post">
 
         <div class="form-group">
-            <input class="form-control" name="name" placeholder="username">
+            <input class="form-control" name="userid" placeholder="username">
         </div>
         <div class="form-group">
-            <input class="form-control" name="password" placeholder="Password">
+            <input class="form-control" name="password" type="password"" placeholder="Password">
         </div>
 
         <div class="form-group">
@@ -21,7 +21,7 @@
         </div>
 
     </form>
-    <form action="{{ url_for('registration') }}" method="post">
+    <form action="{{ url_for('registration') }}" message="",method="post">
       <div class="form-group">
           <button class="btn btn-primary">New Registration</button>
       </div>
