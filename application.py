@@ -1,11 +1,12 @@
 import os
 
-from flask import Flask, session,render_template, request
+from flask import Flask,redirect,url_for,session,render_template, request
 from flask_session import Session
 from sqlalchemy import create_engine
 from sqlalchemy.orm import scoped_session, sessionmaker
 
 app = Flask(__name__)
+
 
 # Check for environment variable
 
@@ -21,46 +22,49 @@ Session(app)
 # Set up database
 engine = create_engine(os.getenv("DATABASE_URL"))
 db = scoped_session(sessionmaker(bind=engine))
+#homemsg="Userid or Password wrong."
+#Session["username"] = "admin"
+
 
 
 @app.route("/")
 def index():
-    return render_template("index.html")
-'''
-@app.route("/home")
-index()
-'''
+    if 'username' in session:
+        username = session['username']
+        user=db.execute("SELECT name,mobile FROM userlogin WHERE userid = :id", {"id": username}).fetchone()
+        return render_template("store.html",user=user)
+    return render_template("login.html",message="")
+
+@app.route("/login",methods=['GET','POST'])
+def login():
+    return render_template("login.html",message="Useid or Password wrong")
+
+
 @app.route("/store",methods=['POST'])
 def store():
-    try:
-        user_id = request.form.get("userid")
-    except ValueError:
-        return render_template("error.html", message="Invalid Userid.")
-
-    try:
-        password = request.form.get("password")
-    except ValueError:
-        return render_template("error.html", message="Invalid Password.")
+    user_id = request.form.get("userid")
+    password = request.form.get("password")
 
     if db.execute("SELECT * FROM userlogin WHERE userid = :id", {"id": user_id}).rowcount == 0:
-        return render_template("error.html", message="User doesn't exist.")
+        #homemsg="userid "+ user_id+" doesn't exist."
+        return redirect(url_for("login"))
+        #return render_template("index.html", message="User doesn't exist.")
     else:
         dbpassword=db.execute("SELECT password FROM userlogin WHERE userid = :id", {"id": user_id}).fetchone()
-        #dbpassword=dbpassword[2:-3]
         dbpassword=dbpassword.password
-    #return render_template("store.html",username=dbpassword,mobile=password)
 
     if password==dbpassword:
         user=db.execute("SELECT name,mobile FROM userlogin WHERE userid = :id", {"id": user_id}).fetchone()
-        #mobile=db.execute("SELECT mobile FROM userlogin WHERE userid = :id", {"id": user_id}).fetchone()
+        session['username'] = user_id
         return render_template("store.html",user=user)
     else:
-        return render_template("error.html", message="Wrong Password")
+        #homemsg="Wrong Password"
+        return redirect(url_for("login"))
+        #return render_template("index.html", message="Wrong Password")
 
 @app.route("/registration",methods=['GET', 'POST'])
 def registration():
     return render_template("registration.html",message="")
-
 @app.route("/succsess",methods=['POST'])
 def succsess():
         userid=request.form.get("userid")
@@ -76,6 +80,13 @@ def succsess():
             db.commit()
             return render_template("success.html",userid=userid)
 
+@app.route('/logout',methods=['GET', 'POST'])
+def logout():
+   # remove the username from the session if it is there
+   session.pop('username', None)
+   return redirect(url_for('index'))
+
 if __name__ == '__main__':
     app.debug = True
+    app.secret_key = "any random string"
     app.run(host='0.0.0.0', port=int(os.environ.get("PORT", 5000)))
