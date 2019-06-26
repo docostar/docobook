@@ -7,7 +7,7 @@
 {% block body %}
     <h1>Welcome to Doco Book Store</h1>
 
-    <form action="{{ url_for('store') }}" method="post">
+    <form action="{{ url_for('store',storevisit=1) }}" method="post">
 
         <div class="form-group">
             <input class="form-control" name="userid" placeholder="username" required>

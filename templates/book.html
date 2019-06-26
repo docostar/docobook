@@ -1,0 +1,75 @@
+
+{% extends "layout.html" %}
+
+
+{% block title %}
+    BooK Details
+
+{% endblock %}
+
+<link rel="stylesheet" href="static/master.css">
+
+{% block body %}
+<header>
+
+  <form action="{{ url_for('logout') }}" method="post">
+      <div class="form-group">
+          <button class="btn btn-primary">Logout</button>
+      </div>
+  </form>
+
+{% if message!="0" %}
+  <div class="alert alert-success" role="alert">
+        {{message}}
+</div>
+{% endif %}
+</header>
+
+<h1>Book Detail for ISBN:{{ book.isbn }}</h1>
+
+  <ul>
+
+      <li><h3>ISBN</h3>: {{ book.isbn }}</li>
+      <li><h3>Title</h3>: {{ book.title }}</li>
+      <li><h3>Author</h3>: {{ book.author }} </li>
+      <li><h3>Publised Year</h3>: {{ book.year }}</li>
+
+  </ul>
+
+<h2>Review</h2>
+
+{% if reviews|length > 0 %}
+
+<table border="1">
+    <col width="100">
+    <col width="80">
+    <col width=auto>
+
+    <tr>
+          <th class="text-center">Name</th>   <th class="text-center">Rating</th>  <th class="text-center"">Review</th>
+    </tr>
+
+{% for review in reviews %}
+
+
+    <tr>
+          <td align="center">{{ review.name }}</td>
+          <td align="center">{{ review.rating }}</td>
+          <td align="center">{{ review.userreview }}</td>
+    </tr>
+{% endfor %}
+
+{% else %}
+      <h5> No Review for this book yet. </h5>
+{% endif %}
+
+
+<form action="{{ url_for('postreview',isbn=book.isbn) }}">
+    <div class="form-group">
+        <button class="btn btn-primary">Post a Review</button>
+    </div>
+</form>
+
+
+
+{% endblock %}

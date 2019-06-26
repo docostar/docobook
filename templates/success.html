@@ -6,8 +6,10 @@
 
 {% block body %}
     <h1>Success!</h1>
+    <div class="alert alert-success" role="alert">
+          User  successfully added with userid {{ userid }}.
+  </div>
 
-    User  successfully added with userid {{ userid }}.
 
     <form action="/",method="get">
       <div class="form-group">

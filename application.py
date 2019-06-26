@@ -40,31 +40,119 @@ def login():
     return render_template("login.html",message="Useid or Password wrong")
 
 
-@app.route("/store",methods=['POST'])
+@app.route("/store",methods=['POST','GET'])
 def store():
-    user_id = request.form.get("userid")
-    password = request.form.get("password")
+    #if request.method=='POST':
+        #storevisit+=1
+        user_id = request.form.get("userid")
+        password = request.form.get("password")
 
-    if db.execute("SELECT * FROM userlogin WHERE userid = :id", {"id": user_id}).rowcount == 0:
+        if db.execute("SELECT * FROM userlogin WHERE userid = :id", {"id": user_id}).rowcount == 0:
         #homemsg="userid "+ user_id+" doesn't exist."
-        return redirect(url_for("login"))
+            return redirect(url_for("login"))
         #return render_template("index.html", message="User doesn't exist.")
-    else:
-        dbpassword=db.execute("SELECT password FROM userlogin WHERE userid = :id", {"id": user_id}).fetchone()
-        dbpassword=dbpassword.password
+        else:
+            dbpassword=db.execute("SELECT password FROM userlogin WHERE userid = :id", {"id": user_id}).fetchone()
+            dbpassword=dbpassword.password
 
-    if password==dbpassword:
-        user=db.execute("SELECT name,mobile FROM userlogin WHERE userid = :id", {"id": user_id}).fetchone()
-        session['username'] = user_id
-        return render_template("store.html",user=user)
+        if password==dbpassword:
+            user=db.execute("SELECT name,mobile FROM userlogin WHERE userid = :id", {"id": user_id}).fetchone()
+            session['username'] = user_id
+            return render_template("store.html",user=user)
+        else:
+            return redirect(url_for("login"))
+
+@app.route("/search",methods=['POST'])
+def search():
+    if 'username' in session:
+        username = session['username']
+        user=db.execute("SELECT name,mobile FROM userlogin WHERE userid = :id", {"id": username}).fetchone()
+
+    isbn=request.form.get("isbn")
+    title=request.form.get("title")
+    author=request.form.get("author")
+
+
+    '''
+    searchstr=""
+    if len(isbn)>0:
+        searchstr+=" isbn like "+isbn;
+    if len(searchstr)>0:
+        searchstr+=" or"
+    if len(title)>0:
+        searchstr+=" title like "+title;
+    if len(searchstr)>0:
+        searchstr+=" or"
+    if len(author)>0:
+        searchstr+=" author like "+author;
+
+    #books= db.execute("SELECT * FROM books where author like :author or title like :title or isbn like :isbn",{"author": author,"title": title,"isbn": isbn}).fetchall()
+    #books= db.execute("SELECT * FROM books where:searchstr",{"searchstr": searchstr}).fetchall()
+    '''
+
+    books1=[]
+    books2=[]
+    books3=[]
+    if len(isbn)>0:
+        searchstr="%"+isbn+"%";
+        books1=db.execute("SELECT * FROM books where isbn like :searchstr",{"searchstr":searchstr}).fetchall()
+
+    if len(title)>0:
+        searchstr="%"+title+"%";
+        books2=db.execute("SELECT * FROM books where title like :searchstr",{"searchstr":searchstr}).fetchall()
+
+    if len(author)>0:
+        searchstr="%"+author+"%";
+        books3=db.execute("SELECT * FROM books where author like :searchstr",{"searchstr":searchstr}).fetchall()
+
+    books=books1+books2+books3
+
+    return render_template("search.html",user=user,books=books)
+
+
+@app.route("/books/<string:isbn>/<string:message>")
+def book(isbn,message):
+    if 'username' in session:
+        book=db.execute("SELECT * FROM books where isbn=:searchstr",{"searchstr":isbn}).fetchone()
+        reviews=db.execute("SELECT name,rating,userreview FROM review JOIN userlogin ON review.userid=userlogin.userid where isbn=:searchstr",{"searchstr":isbn}).fetchall()
+        return render_template("book.html",book=book,reviews=reviews,message=message)
     else:
-        #homemsg="Wrong Password"
-        return redirect(url_for("login"))
-        #return render_template("index.html", message="Wrong Password")
+        return redirect(url_for('index'))
+
+@app.route("/postreview/<string:isbn>")
+def postreview(isbn):
+    if 'username' in session:
+        return render_template("postreview.html",isbn=isbn)
+    else:
+        return redirect(url_for('index'))
+
+@app.route("/reviewadd/<string:isbn>",methods=['POST','GET'])
+def reviewadd(isbn):
+    if 'username' in session:
+        username = session['username']
+        rating=request.form['rating']
+        userreview=request.form['review']
+        if db.execute("SELECT * FROM review WHERE userid = :id and isbn=:isbn", {"id": username,"isbn":isbn}).rowcount == 0:
+            db.execute("INSERT INTO review (rating,userreview,isbn,userid) VALUES (:rating,:userreview,:isbn,:userid)",
+                    {"rating":rating,"userreview":userreview,"isbn": isbn, "userid": username})
+            db.commit()
+            return redirect(url_for('book',isbn=isbn,message="Your review added successfully."))
+        else:
+            db.execute("update review set rating=:rating,userreview=:userreview where userid= :userid and isbn= :isbn ",
+                        {"rating":rating, "userreview":userreview,"userid":username,"isbn":isbn})
+            db.commit()
+            return redirect(url_for('book',isbn=isbn,message="Your review updated successfully."))
+
+
+    else:
+        return redirect(url_for('index'))
+
 
 @app.route("/registration",methods=['GET', 'POST'])
 def registration():
     return render_template("registration.html",message="")
+
+
 @app.route("/succsess",methods=['POST'])
 def succsess():
         userid=request.form.get("userid")

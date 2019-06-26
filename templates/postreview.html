@@ -1,0 +1,30 @@
+{% extends "layout.html" %}
+
+{% block title %}
+    Post Review
+{% endblock %}
+
+{% block body %}
+
+Select Rating:
+<form action="{{url_for("reviewadd",isbn=isbn)}}" method="POST">
+      <fieldset>
+          <div class="form-group">
+              {% for i in range(6) %}
+                  <input type="radio" class="radio" name="rating" value={{i}} id="x{{i}}"  required/>
+                  <label for="x{{i}}">{{i}}</label>
+              {% endfor %}
+          </div>
+      </fieldset>
+
+      <div class="form-group">
+          <label for="review">Write Review Here:</label>
+          <textarea class="form-control" rows="5" name="review" required></textarea>
+      </div>
+    <div class="form-group">
+        <button class="btn btn-primary">Post Review</button>
+    </div>
+</form>
+
+
+{% endblock %}

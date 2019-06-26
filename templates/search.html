@@ -26,6 +26,28 @@
 
     </form>
 
+    {% if books|length > 0 %}
+    <table>
+        <col width="150">
+        <col width="250">
+        <col width="200">
+
+        <tr>
+              <th>ISBN</th>   <th>Title</th>  <th>Author</th>
+        </tr>
+        {% for book in books %}
+            <tr>
+                <td>{{book.isbn}}</td>  <td>{{book.title}}</td>   <td>{{book.author}}</td>  <td><a href="{{ url_for('book', isbn=book.isbn,message="0" ) }}"> Click for more details</a></td>
+            </tr>
+        {% endfor %}
+      </table>
+    {% else %}
+          <h5>No Matching results found</h5>
+    {% endif %}
+
+
+
+
 
 
 
