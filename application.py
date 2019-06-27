@@ -32,7 +32,8 @@ def index():
     if 'username' in session:
         username = session['username']
         user=db.execute("SELECT name,mobile FROM userlogin WHERE userid = :id", {"id": username}).fetchone()
-        return render_template("store.html",user=user)
+        books=db.execute("SELECT * FROM books limit 50")
+        return render_template("store.html",user=user,books=books)
     return render_template("login.html",message="")
 
 @app.route("/login",methods=['GET','POST'])
@@ -58,7 +59,8 @@ def store():
         if password==dbpassword:
             user=db.execute("SELECT name,mobile FROM userlogin WHERE userid = :id", {"id": user_id}).fetchone()
             session['username'] = user_id
-            return render_template("store.html",user=user)
+            books=db.execute("SELECT * FROM books limit 50")
+            return render_template("store.html",user=user,books=books)
         else:
             return redirect(url_for("login"))
 

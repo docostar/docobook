@@ -4,7 +4,14 @@
     Book Store
 {% endblock %}
 
+
 {% block body %}
+<form action="{{ url_for('logout') }}" method="post">
+    <div class="form-group">
+        <button class="btn btn-primary">Logout</button>
+    </div>
+</form>
+
     <h1>Welcome to our store, {{ user.name }}</h1>
     <h2>Your Mobile No: {{ user.mobile }} </h2>
 
@@ -27,11 +34,21 @@
     </form>
 
 
+    <table>
+        <col width="150">
+        <col width="250">
+        <col width="200">
+
+        <tr>
+              <th>ISBN</th>   <th>Title</th>  <th>Author</th>
+        </tr>
+        {% for book in books %}
+            <tr>
+                <td>{{book.isbn}}</td>  <td>{{book.title}}</td>   <td>{{book.author}}</td>  <td><a href="{{ url_for('book', isbn=book.isbn,message="0" ) }}"> Click for more details</a></td>
+            </tr>
+        {% endfor %}
+    </table>
 
 
-<form action="{{ url_for('logout') }}" method="post">
-    <div class="form-group">
-        <button class="btn btn-primary">Logout</button>
-    </div>
-</form>
+
 {% endblock %}
