@@ -54,7 +54,7 @@ psycopg2==2.8.3
 ptyprocess==0.6.0
 public==0.0.65
 pygame==1.9.4
-Pygments==2.3.1
+Pygments==2.7.4
 pyparsing==2.2.0
 pyrsistent==0.14.11
 PySimpleGUI==3.29.0
